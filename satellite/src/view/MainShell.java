@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2018, Antoine DELACROIX.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Antoine DELACROIX - initial API and implementation
+ *******************************************************************************/
+
 package view;
 
 import java.io.File;
@@ -18,7 +29,28 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 public class MainShell {
+	
+	public static final String APPLIDATION_TITLE = "Satellite Application";
+	
+	public static final String JPG_EXTENSION = "jpg";
+	
+	public static final String LEFT = "Left";
+	
+	public static final String RIGHT = "Right";
+	
+	/**
+	 * Complete Image List
+	 */
+	public List<Image> imageList;
+	
+	/**
+	 * Current Image Index
+	 */
 	public int index = 0;
+	
+	/**
+	 * Current image
+	 */
 	public Image image;
 
 	public MainShell() {
@@ -26,84 +58,71 @@ public class MainShell {
 		Display display = new Display();
 		final Shell shell = new Shell(display);
 		shell.setLayout(new RowLayout());
-		shell.setText("Photo Application");
+		shell.setText(APPLIDATION_TITLE);
 		String imagePath = "";
-		// initialize a parent composite with a grid layout manager
-		// with 5x columns
 		Composite parent = new Composite(shell, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
 		parent.setLayout(gridLayout);
 
 		// Get the Display default icons
-		List<Image> imageList = new ArrayList<Image>();
+		imageList = new ArrayList<Image>();
 
-		// String path =
-		// MainShell.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		System.out.println(new File(".").getAbsolutePath());
 		String path = new File(".").getAbsolutePath();
 		File runnableFile = new File(path);
 
 		String parentPath = runnableFile.getParentFile().getPath();
-		System.out.println("path = " + path);
 		imagePath = parentPath + "//photos";
-		// String decodedPath = URLDecoder.decode(path, "UTF-8");
 		File folder = new File(imagePath);
 		File[] fList = folder.listFiles();
 
 		for (File file : fList) {
 			// check file extension
 			String extension = file.getPath().toString().substring(file.getPath().toString().length() - 3);
-			if (extension.equals("jpg")) {
+			if (extension.equals(JPG_EXTENSION)) {
 				imageList.add(new Image(display, file.getPath()));
-				System.out.println(file.getPath() + " added");
 			}
 		}
 
 		image = imageList.get(0);
 
-		// for (Image image : imageList) {
 		Label label = new Label(parent, SWT.NONE);
 		image = resize(image, 200, 300);
 		label.setImage(image);
-		// }
-		// show the SWT window
 
 		Composite buttonsParent = new Composite(parent, SWT.NONE);
 		GridLayout buttonsParentGridLayout = new GridLayout(2, true);
 		buttonsParent.setLayout(buttonsParentGridLayout);
-		Button buttonLeft = new Button(buttonsParent, SWT.PUSH);
-		buttonLeft.setText("Left");
-		buttonLeft.addSelectionListener(new SelectionAdapter() {
-
+		Button leftButton = new Button(buttonsParent, SWT.PUSH);
+		leftButton.setText(LEFT);
+		leftButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				System.out.println("Left");
-				// image.dispose();
-				index--;
-				if (index < 0) {
-					index = imageList.size() - 1;
-				}
-				System.out.println("index = " + index + " imageList.size() = " + imageList.size());
+				downIndex();
 				label.setImage(resize(imageList.get(index), 200, 300));
 			}
 		});
 
-		Button buttonRight = new Button(buttonsParent, SWT.PUSH);
-		buttonRight.setText("Right");
-		buttonRight.addSelectionListener(new SelectionAdapter() {
-
+		Button rightButton = new Button(buttonsParent, SWT.PUSH);
+		rightButton.setText(RIGHT);
+		rightButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				System.out.println("Right");
-				// image.dispose();
-				index++;
-				if (index > imageList.size() - 1) {
-					index = 0;
-				}
-				System.out.println("index = " + index + " imageList.size() = " + imageList.size());
+				upIndex();
 				label.setImage(resize(imageList.get(index), 200, 300));
 			}
 		});
+		endProgram(shell, display);
+	}
+	
+	public void downIndex() {
+		index--;
+		if (index < 0) {
+			index = imageList.size() - 1;
+		}
+		System.out.println("index = " + index + " imageList.size() = " + imageList.size());
+	}
+
+	public void endProgram(Shell shell, Display display) {
 		shell.pack();
 		shell.open();
 
@@ -114,6 +133,7 @@ public class MainShell {
 		// tear down the SWT window
 		display.dispose();
 	}
+
 
 	private Image resize(Image image, int width, int height) {
 		Image scaled = null;
@@ -126,5 +146,12 @@ public class MainShell {
 			gc.dispose();
 		}
 		return scaled;
+	}
+	
+	public void upIndex() {
+		index++;
+		if (index > imageList.size() - 1) {
+			index = 0;
+		}
 	}
 }
